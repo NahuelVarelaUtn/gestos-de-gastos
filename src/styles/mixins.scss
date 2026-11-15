@@ -1,0 +1,16 @@
+// src/styles/_mixins.scss
+@use 'variables' as *;
+
+// Aplica estilos desde tablet en adelante
+@mixin from-md {
+  @media (min-width: $breakpoint-md) {
+    @content;
+  }
+}
+
+// Aplica estilos desde desktop en adelante
+@mixin from-lg {
+  @media (min-width: $breakpoint-lg) {
+    @content;
+  }
+}

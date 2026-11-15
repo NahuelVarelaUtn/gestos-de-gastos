@@ -1,0 +1,9 @@
+@use '../styles/mixins' as *;
+
+.title {
+  font-size: 1.5rem;
+
+  @include from-md {
+    font-size: 2.25rem;
+  }
+}
