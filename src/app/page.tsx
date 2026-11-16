@@ -6,10 +6,12 @@ import { SummaryCards } from '@/components/summary/SummaryCards';
 import { TransactionForm } from '@/components/transactions/TransactionForm';
 import { TransactionList } from '@/components/transactions/TransactionList';
 import { useFinanceData } from '@/hooks/useFinanceData';
+import { useIsClient } from '@/hooks/useIsClient';
 import { useFinanceStore } from '@/store/useFinanceStore';
 
 export default function HomePage() {
   useFinanceData();
+  const isClient = useIsClient();
   const error = useFinanceStore((state) => state.error);
   const editingTransaction = useFinanceStore(
     (state) => state.editingTransaction,
@@ -27,12 +29,20 @@ export default function HomePage() {
         </p>
       )}
 
-      <MonthFilter />
-      <SummaryCards />
-      {/* Al cambiar la key, React recrea el formulario con los datos nuevos */}
-      <TransactionForm key={editingTransaction?.id ?? 'new'} />
-      <CategoryBreakdown />
-      <TransactionList />
+      {/* El panel depende de la fecha actual y de los datos del usuario:
+          se renderiza solo en el navegador, nunca en el build. */}
+      {isClient ? (
+        <>
+          <MonthFilter />
+          <SummaryCards />
+          {/* Al cambiar la key, React recrea el formulario con los datos nuevos */}
+          <TransactionForm key={editingTransaction?.id ?? 'new'} />
+          <CategoryBreakdown />
+          <TransactionList />
+        </>
+      ) : (
+        <p className="text-slate-500">Cargando...</p>
+      )}
     </main>
   );
 }

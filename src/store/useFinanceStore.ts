@@ -7,7 +7,6 @@ interface FinanceState {
   filter: MonthFilter;
   isLoading: boolean;
   error: string | null;
-  /** Transacción que se está editando en el formulario (null = modo crear). */
   editingTransaction: Transaction | null;
 }
 
@@ -23,14 +22,22 @@ interface FinanceActions {
   setEditingTransaction: (transaction: Transaction | null) => void;
 }
 
-const today = new Date();
+/** Mes y año actuales. En el servidor devuelve un valor fijo que nunca se muestra. */
+function getInitialFilter(): MonthFilter {
+  // window solo existe en el navegador: así evitamos leer la fecha en el build.
+  if (typeof window === 'undefined') {
+    return { month: 1, year: 2000 };
+  }
+  const today = new Date();
+  return { month: today.getMonth() + 1, year: today.getFullYear() };
+}
 
 export const useFinanceStore = create<FinanceState & FinanceActions>()(
   (set) => ({
     // --- Estado inicial ---
     transactions: [],
     categories: [],
-    filter: { month: today.getMonth() + 1, year: today.getFullYear() },
+    filter: getInitialFilter(),
     isLoading: false,
     error: null,
     editingTransaction: null,
