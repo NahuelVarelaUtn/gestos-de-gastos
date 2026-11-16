@@ -18,13 +18,30 @@ const TYPE_OPTIONS: { value: TransactionType; label: string }[] = [
 
 export function TransactionForm() {
   const categories = useFinanceStore((state) => state.categories);
-  const { create } = useTransactionActions();
+  const editingTransaction = useFinanceStore(
+    (state) => state.editingTransaction,
+  );
+  const setEditingTransaction = useFinanceStore(
+    (state) => state.setEditingTransaction,
+  );
+  const { create, update } = useTransactionActions();
 
-  const [type, setType] = useState<TransactionType>('expense');
-  const [amount, setAmount] = useState('');
-  const [categoryId, setCategoryId] = useState('');
-  const [date, setDate] = useState(todayISO);
-  const [description, setDescription] = useState('');
+  const isEditing = editingTransaction !== null;
+
+  // Si hay una transacción en edición, sus datos son los valores iniciales.
+  const [type, setType] = useState<TransactionType>(
+    editingTransaction?.category.type ?? 'expense',
+  );
+  const [amount, setAmount] = useState(
+    editingTransaction ? String(editingTransaction.amount) : '',
+  );
+  const [categoryId, setCategoryId] = useState(
+    editingTransaction?.category.id ?? '',
+  );
+  const [date, setDate] = useState(editingTransaction?.date ?? todayISO());
+  const [description, setDescription] = useState(
+    editingTransaction?.description ?? '',
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Solo mostramos las categorías del tipo elegido.
@@ -45,16 +62,24 @@ export function TransactionForm() {
       return;
     }
 
-    setIsSubmitting(true);
-    const wasCreated = await create({
+    const input = {
       amount: parsedAmount,
       description: description.trim() || null,
       date,
       category_id: categoryId,
-    });
+    };
+
+    setIsSubmitting(true);
+    const wasSaved = editingTransaction
+      ? await update(editingTransaction.id, input)
+      : await create(input);
     setIsSubmitting(false);
 
-    if (wasCreated) {
+    if (!wasSaved) return;
+
+    if (editingTransaction) {
+      setEditingTransaction(null); // Salir del modo edición.
+    } else {
       setAmount('');
       setDescription('');
     }
@@ -65,7 +90,9 @@ export function TransactionForm() {
       onSubmit={handleSubmit}
       className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
     >
-      <h2 className="text-lg font-semibold">Nueva transacción</h2>
+    <h2 className="text-lg font-semibold">
+        {isEditing ? 'Editar transacción' : 'Nueva transacción'}
+    </h2>
 
       <fieldset className="grid grid-cols-2 gap-2">
         <legend className="sr-only">Tipo de transacción</legend>
@@ -164,13 +191,24 @@ export function TransactionForm() {
         </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full rounded-lg bg-indigo-600 px-4 py-3 font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
-      >
-        {isSubmitting ? 'Guardando...' : 'Agregar'}
-      </button>
+    <div className="flex gap-2">
+  {isEditing && (
+    <button
+      type="button"
+      onClick={() => setEditingTransaction(null)}
+      className="w-full rounded-lg border border-slate-300 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50"
+    >
+      Cancelar
+    </button>
+  )}
+  <button
+    type="submit"
+    disabled={isSubmitting}
+    className="w-full rounded-lg bg-indigo-600 px-4 py-3 font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+  >
+    {isSubmitting ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Agregar'}
+  </button>
+</div>
     </form>
   );
 }

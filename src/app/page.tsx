@@ -1,5 +1,7 @@
 'use client';
 
+import { CategoryBreakdown } from '@/components/summary/CategoryBreakdown';
+import { MonthFilter } from '@/components/summary/MonthFilter';
 import { SummaryCards } from '@/components/summary/SummaryCards';
 import { TransactionForm } from '@/components/transactions/TransactionForm';
 import { TransactionList } from '@/components/transactions/TransactionList';
@@ -9,6 +11,9 @@ import { useFinanceStore } from '@/store/useFinanceStore';
 export default function HomePage() {
   useFinanceData();
   const error = useFinanceStore((state) => state.error);
+  const editingTransaction = useFinanceStore(
+    (state) => state.editingTransaction,
+  );
 
   return (
     <main className="mx-auto min-h-screen max-w-3xl space-y-6 p-4 md:p-8">
@@ -22,8 +27,11 @@ export default function HomePage() {
         </p>
       )}
 
+      <MonthFilter />
       <SummaryCards />
-      <TransactionForm />
+      {/* Al cambiar la key, React recrea el formulario con los datos nuevos */}
+      <TransactionForm key={editingTransaction?.id ?? 'new'} />
+      <CategoryBreakdown />
       <TransactionList />
     </main>
   );

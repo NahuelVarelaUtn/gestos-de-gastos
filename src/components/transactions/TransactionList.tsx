@@ -3,9 +3,14 @@
 import { useTransactionActions } from '@/hooks/useTransactionActions';
 import { useFinanceStore } from '@/store/useFinanceStore';
 import { formatCurrency, formatDate } from '@/utils/formatters';
+import { useFinanceSummary } from '@/hooks/useFinanceSummary';
 
 export function TransactionList() {
-  const transactions = useFinanceStore((state) => state.transactions);
+  // Ahora la lista respeta el filtro de mes.
+const { monthlyTransactions: transactions } = useFinanceSummary();
+const setEditingTransaction = useFinanceStore(
+  (state) => state.setEditingTransaction,
+);
   const isLoading = useFinanceStore((state) => state.isLoading);
   const { remove } = useTransactionActions();
 
@@ -23,7 +28,7 @@ export function TransactionList() {
 
       {!isLoading && transactions.length === 0 && (
         <p className="mt-3 text-slate-500">
-          Todavía no cargaste ninguna transacción.
+            No hay transacciones en este mes.
         </p>
       )}
 
@@ -57,6 +62,18 @@ export function TransactionList() {
                   {isIncome ? '+' : '-'}
                   {formatCurrency(transaction.amount)}
                 </span>
+                <button
+  type="button"
+  onClick={() => {
+    setEditingTransaction(transaction);
+    // En celular el formulario queda arriba: lo traemos a la vista.
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }}
+  aria-label={`Editar ${transaction.description ?? transaction.category.name}`}
+  className="rounded-lg px-2 py-1 text-slate-400 hover:bg-indigo-50 hover:text-indigo-600"
+>
+  ✎
+</button>
                 <button
                   type="button"
                   onClick={() => handleDelete(transaction.id)}
