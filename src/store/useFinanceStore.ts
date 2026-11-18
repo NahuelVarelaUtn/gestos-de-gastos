@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import type { Category, MonthFilter, Transaction } from '@/types';
+import type { AuthUser, Category, MonthFilter, Transaction } from '@/types';
+
 
 interface FinanceState {
   transactions: Transaction[];
@@ -8,6 +9,7 @@ interface FinanceState {
   isLoading: boolean;
   error: string | null;
   editingTransaction: Transaction | null;
+  user: AuthUser | null;
 }
 
 interface FinanceActions {
@@ -20,6 +22,7 @@ interface FinanceActions {
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
   setEditingTransaction: (transaction: Transaction | null) => void;
+  setUser: (user: AuthUser | null) => void;
 }
 
 /** Mes y año actuales. En el servidor devuelve un valor fijo que nunca se muestra. */
@@ -41,6 +44,8 @@ export const useFinanceStore = create<FinanceState & FinanceActions>()(
     isLoading: false,
     error: null,
     editingTransaction: null,
+    user: null,
+    setUser: (user) => set({ user }),
 
     // --- Acciones ---
     setTransactions: (transactions) => set({ transactions }),

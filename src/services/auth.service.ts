@@ -1,12 +1,8 @@
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import type { AuthUser } from '@/types';
 
 /** Datos del usuario que le interesan a la UI. */
-export interface AuthUser {
-  id: string;
-  email: string | null;
-  isAnonymous: boolean;
-}
 
 function toAuthUser(user: User): AuthUser {
   return {

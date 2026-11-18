@@ -30,3 +30,10 @@ export interface MonthFilter {
   month: number;
   year: number;
 }   
+
+/** Datos del usuario que le interesan a la UI. */
+export interface AuthUser {
+  id: string;
+  email: string | null;
+  isAnonymous: boolean;
+}

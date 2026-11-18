@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
-import { ensureSession } from '@/services/auth.service';
+import { ensureSession, getCurrentUser } from '@/services/auth.service';
 import { getCategories } from '@/services/categories.service';
 import { getTransactions } from '@/services/transactions.service';
 import { useFinanceStore } from '@/store/useFinanceStore';
 
-/** Carga los datos iniciales desde Supabase y los guarda en el store. */
+/** Carga la sesión y los datos iniciales desde Supabase y los guarda en el store. */
 export function useFinanceData(): void {
+  const setUser = useFinanceStore((state) => state.setUser);
   const setCategories = useFinanceStore((state) => state.setCategories);
   const setTransactions = useFinanceStore((state) => state.setTransactions);
   const setLoading = useFinanceStore((state) => state.setLoading);
@@ -17,12 +18,17 @@ export function useFinanceData(): void {
     async function loadData() {
       setLoading(true);
       try {
+        // Primero la sesión: sin ella, RLS no devuelve ninguna fila.
         await ensureSession();
-        // Las dos consultas viajan en paralelo.
-        const [categories, transactions] = await Promise.all([
+
+        // Las tres consultas viajan en paralelo.
+        const [user, categories, transactions] = await Promise.all([
+          getCurrentUser(),
           getCategories(),
           getTransactions(),
         ]);
+
+        setUser(user);
         setCategories(categories);
         setTransactions(transactions);
         setError(null);
@@ -34,5 +40,5 @@ export function useFinanceData(): void {
     }
 
     void loadData();
-  }, [setCategories, setTransactions, setLoading, setError]);
+  }, [setUser, setCategories, setTransactions, setLoading, setError]);
 }

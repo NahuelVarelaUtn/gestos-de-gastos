@@ -8,6 +8,8 @@ import { TransactionList } from '@/components/transactions/TransactionList';
 import { useFinanceData } from '@/hooks/useFinanceData';
 import { useIsClient } from '@/hooks/useIsClient';
 import { useFinanceStore } from '@/store/useFinanceStore';
+import { AccountPanel } from '@/components/account/AccountPanel';
+
 
 export default function HomePage() {
   useFinanceData();
@@ -19,9 +21,10 @@ export default function HomePage() {
 
   return (
     <main className="mx-auto min-h-screen max-w-3xl space-y-6 p-4 md:p-8">
-      <header>
-        <h1 className="text-2xl font-bold md:text-3xl">Gestos de Gastos</h1>
-      </header>
+      <header className="space-y-3">
+  <h1 className="text-2xl font-bold md:text-3xl">Gestos de Gastos</h1>
+  <AccountPanel />
+</header>
 
       {error && (
         <p role="alert" className="rounded-lg bg-rose-50 p-3 text-rose-700">
@@ -39,6 +42,7 @@ export default function HomePage() {
           <TransactionForm key={editingTransaction?.id ?? 'new'} />
           <CategoryBreakdown />
           <TransactionList />
+          <AccountPanel />
         </>
       ) : (
         <p className="text-slate-500">Cargando...</p>
