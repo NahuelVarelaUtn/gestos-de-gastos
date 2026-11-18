@@ -12,7 +12,7 @@ y mirá en qué categorías se va tu plata.
 - Balance general y balance filtrado por mes
 - Gasto por categoría con porcentajes
 - Diseño Mobile First
-- Sesión anónima: se puede probar sin registrarse
+- Uso sin registro (sesión anónima) y cuenta con email, sin perder los datos cargados
 
 ## Stack
 
