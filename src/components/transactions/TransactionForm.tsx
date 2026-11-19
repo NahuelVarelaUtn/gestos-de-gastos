@@ -1,29 +1,35 @@
 'use client';
 
+import { motion } from 'motion/react';
 import { useState, type SyntheticEvent } from 'react';
-import {
-  INPUT_CLASS,
-  PRIMARY_BUTTON_CLASS,
-  SECONDARY_BUTTON_CLASS,
-} from '@/components/ui/classNames';
+import { CategoryPicker } from '@/components/transactions/CategoryPicker';
+import { Button } from '@/components/ui/Button';
 import { useTransactionActions } from '@/hooks/useTransactionActions';
 import { useFinanceStore } from '@/store/useFinanceStore';
 import type { TransactionType } from '@/types';
 import { todayISO } from '@/utils/formatters';
+
+// text-base (16px) evita que iOS haga zoom al enfocar el campo.
+const INPUT_CLASS =
+  'w-full rounded-xl border border-white/15 bg-abyss/60 px-3 py-2 text-base ' +
+  'focus:border-ocean focus:outline-none focus:ring-2 focus:ring-ocean/30';
 
 const TYPE_OPTIONS: { value: TransactionType; label: string }[] = [
   { value: 'expense', label: 'Gasto' },
   { value: 'income', label: 'Ingreso' },
 ];
 
-export function TransactionForm() {
+interface TransactionFormProps {
+  /** Se llama al guardar o cancelar, para cerrar el modal. */
+  onDone: () => void;
+}
+
+export function TransactionForm({ onDone }: TransactionFormProps) {
   const categories = useFinanceStore((state) => state.categories);
   const editingTransaction = useFinanceStore(
     (state) => state.editingTransaction,
   );
-  const setEditingTransaction = useFinanceStore(
-    (state) => state.setEditingTransaction,
-  );
+  const error = useFinanceStore((state) => state.error);
   const { create, update } = useTransactionActions();
 
   const isEditing = editingTransaction !== null;
@@ -44,7 +50,6 @@ export function TransactionForm() {
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Solo mostramos las categorías del tipo elegido.
   const availableCategories = categories.filter(
     (category) => category.type === type,
   );
@@ -55,7 +60,7 @@ export function TransactionForm() {
   }
 
   async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
-    event.preventDefault(); // Evita que el navegador recargue la página.
+    event.preventDefault();
 
     const parsedAmount = Number(amount);
     if (!categoryId || !Number.isFinite(parsedAmount) || parsedAmount <= 0) {
@@ -75,33 +80,26 @@ export function TransactionForm() {
       : await create(input);
     setIsSubmitting(false);
 
-    if (!wasSaved) return;
-
-    if (editingTransaction) {
-      setEditingTransaction(null); // Salir del modo edición.
-    } else {
-      setAmount('');
-      setDescription('');
-    }
+    if (wasSaved) onDone();
   }
 
   return (
-    <form onSubmit={handleSubmit} className="glass-card space-y-4 p-4">
-      <h2 className="text-lg font-semibold">
-        {isEditing ? 'Editar transacción' : 'Nueva transacción'}
-      </h2>
-
-      <fieldset className="grid grid-cols-2 gap-2">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Selector segmentado con indicador que se desliza */}
+      <fieldset className="grid grid-cols-2 gap-1 rounded-xl bg-abyss/60 p-1">
         <legend className="sr-only">Tipo de transacción</legend>
         {TYPE_OPTIONS.map((option) => (
           <label
             key={option.value}
-            className={`cursor-pointer rounded-lg border px-3 py-2 text-center font-medium transition-colors ${
-              type === option.value
-                ? 'border-ocean bg-ocean text-white'
-                : 'border-white/15 bg-white/5 text-glacier hover:bg-white/10'
-            }`}
+            className="relative cursor-pointer rounded-lg px-3 py-2 text-center font-medium has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ocean"
           >
+            {type === option.value && (
+              <motion.span
+                layoutId="type-indicator"
+                className="absolute inset-0 rounded-lg bg-ocean"
+                transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+              />
+            )}
             <input
               type="radio"
               name="type"
@@ -110,52 +108,36 @@ export function TransactionForm() {
               onChange={() => handleTypeChange(option.value)}
               className="sr-only"
             />
-            {option.label}
+            <span className="relative">{option.label}</span>
           </label>
         ))}
       </fieldset>
 
+      <div>
+        <label htmlFor="amount" className="mb-1 block text-sm font-medium">
+          Monto
+        </label>
+        <input
+          id="amount"
+          type="number"
+          inputMode="decimal"
+          min="0.01"
+          step="0.01"
+          required
+          placeholder="0,00"
+          value={amount}
+          onChange={(event) => setAmount(event.target.value)}
+          className={INPUT_CLASS}
+        />
+      </div>
+
+      <CategoryPicker
+        categories={availableCategories}
+        value={categoryId}
+        onChange={setCategoryId}
+      />
+
       <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label htmlFor="amount" className="mb-1 block text-sm font-medium">
-            Monto
-          </label>
-          <input
-            id="amount"
-            type="number"
-            inputMode="decimal"
-            min="0.01"
-            step="0.01"
-            required
-            placeholder="0,00"
-            value={amount}
-            onChange={(event) => setAmount(event.target.value)}
-            className={INPUT_CLASS}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="category" className="mb-1 block text-sm font-medium">
-            Categoría
-          </label>
-          <select
-            id="category"
-            required
-            value={categoryId}
-            onChange={(event) => setCategoryId(event.target.value)}
-            className={INPUT_CLASS}
-          >
-            <option value="" disabled>
-              Elegí una categoría
-            </option>
-            {availableCategories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
         <div>
           <label htmlFor="date" className="mb-1 block text-sm font-medium">
             Fecha
@@ -188,23 +170,19 @@ export function TransactionForm() {
         </div>
       </div>
 
+      {error && (
+        <p role="alert" className="rounded-xl bg-coral/10 p-3 text-sm text-coral">
+          {error}
+        </p>
+      )}
+
       <div className="flex gap-2">
-        {isEditing && (
-          <button
-            type="button"
-            onClick={() => setEditingTransaction(null)}
-            className={SECONDARY_BUTTON_CLASS}
-          >
-            Cancelar
-          </button>
-        )}
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className={PRIMARY_BUTTON_CLASS}
-        >
+        <Button type="button" variant="secondary" onClick={onDone}>
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Agregar'}
-        </button>
+        </Button>
       </div>
     </form>
   );

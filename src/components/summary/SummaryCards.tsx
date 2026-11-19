@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'motion/react';
 import { useFinanceSummary } from '@/hooks/useFinanceSummary';
 import { formatCurrency } from '@/utils/formatters';
 import styles from './SummaryCards.module.scss';
@@ -17,12 +18,17 @@ export function SummaryCards() {
     <section aria-label="Resumen financiero" className="space-y-3">
       <div className={styles.grid}>
         {cards.map((card) => (
-          <article key={card.label} className="glass-card p-4">
+          <motion.article
+            key={card.label}
+            whileHover={{ y: -4 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            className="glass-card p-4"
+          >
             <h2 className="text-sm text-mist">{card.label}</h2>
             <p className={`mt-1 text-2xl font-bold ${card.color}`}>
               {formatCurrency(card.value)}
             </p>
-          </article>
+          </motion.article>
         ))}
       </div>
 

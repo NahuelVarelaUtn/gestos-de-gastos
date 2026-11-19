@@ -1,16 +1,16 @@
 import { useSyncExternalStore } from 'react';
 
-// No hay nada a lo que suscribirse: el valor nunca cambia después de montar.
 const subscribe = () => () => {};
 
 /**
- * Devuelve false en el servidor (y durante la hidratación)
- * y true una vez que el componente ya vive en el navegador.
+ * false durante el render del servidor y la hidratación,
+ * true en el navegador. Sirve para mostrar contenido que
+ * depende del cliente (como la fecha actual) sin errores de hidratación.
  */
 export function useIsClient(): boolean {
   return useSyncExternalStore(
     subscribe,
-    () => true, // valor en el navegador
+    () => true, // valor en el cliente
     () => false, // valor en el servidor
   );
 }
