@@ -1,1 +1,29 @@
 @import "tailwindcss";
+
+/* Tokens de diseño: cada color genera clases como bg-ocean o text-mist */
+@theme {
+  --color-abyss: #0b132b;   /* fondo principal */
+  --color-deep: #1c2541;    /* superficies */
+  --color-tide: #3a506b;    /* bordes y detalles */
+  --color-mist: #8da9c4;    /* texto secundario */
+  --color-glacier: #e0f4fa; /* texto principal */
+  --color-ocean: #3a86ff;   /* acento y acciones */
+  --color-cobalt: #0077b6;  /* acento en hover */
+  --color-aqua: #2ec4b6;    /* positivo: ingresos */
+  --color-coral: #ff7b7b;   /* negativo: gastos y errores */
+}
+
+/* inline: referencia la variable que crea next/font en layout.tsx */
+@theme inline {
+    --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+    min-height: 100dvh;
+    color: var(--color-glacier);
+  /* Dos "luces" difusas sobre el azul noche: el cristal necesita algo detrás */
+    background:
+    radial-gradient(circle at 15% 0%, rgb(58 134 255 / 0.18), transparent 45%),
+    radial-gradient(circle at 85% 100%, rgb(46 196 182 / 0.12), transparent 45%),
+    var(--color-abyss);
+}

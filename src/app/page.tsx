@@ -1,52 +1,22 @@
 'use client';
 
-import { CategoryBreakdown } from '@/components/summary/CategoryBreakdown';
-import { MonthFilter } from '@/components/summary/MonthFilter';
-import { SummaryCards } from '@/components/summary/SummaryCards';
-import { TransactionForm } from '@/components/transactions/TransactionForm';
-import { TransactionList } from '@/components/transactions/TransactionList';
-import { useFinanceData } from '@/hooks/useFinanceData';
-import { useIsClient } from '@/hooks/useIsClient';
-import { useFinanceStore } from '@/store/useFinanceStore';
-import { AccountPanel } from '@/components/account/AccountPanel';
+import dynamic from 'next/dynamic';
 
+// ssr: false -> el Dashboard no se renderiza en el servidor ni en el build.
+// Depende de la sesión y de la fecha del usuario, que solo existen en el navegador.
+const Dashboard = dynamic(
+  () => import('@/components/Dashboard').then((module) => module.Dashboard),
+  {
+    ssr: false,
+    // Esto sí se prerenderiza: se ve al instante mientras carga la app.
+    loading: () => (
+      <main className="mx-auto max-w-3xl p-4 md:p-8">
+        <p className="text-mist">Cargando...</p>
+      </main>
+    ),
+  },
+);
 
 export default function HomePage() {
-  useFinanceData();
-  const isClient = useIsClient();
-  const error = useFinanceStore((state) => state.error);
-  const editingTransaction = useFinanceStore(
-    (state) => state.editingTransaction,
-  );
-
-  return (
-    <main className="mx-auto min-h-screen max-w-3xl space-y-6 p-4 md:p-8">
-      <header className="space-y-3">
-  <h1 className="text-2xl font-bold md:text-3xl">Gestos de Gastos</h1>
-  <AccountPanel />
-</header>
-
-      {error && (
-        <p role="alert" className="rounded-lg bg-rose-50 p-3 text-rose-700">
-          {error}
-        </p>
-      )}
-
-      {/* El panel depende de la fecha actual y de los datos del usuario:
-          se renderiza solo en el navegador, nunca en el build. */}
-      {isClient ? (
-        <>
-          <MonthFilter />
-          <SummaryCards />
-          {/* Al cambiar la key, React recrea el formulario con los datos nuevos */}
-          <TransactionForm key={editingTransaction?.id ?? 'new'} />
-          <CategoryBreakdown />
-          <TransactionList />
-          <AccountPanel />
-        </>
-      ) : (
-        <p className="text-slate-500">Cargando...</p>
-      )}
-    </main>
-  );
+  return <Dashboard />;
 }

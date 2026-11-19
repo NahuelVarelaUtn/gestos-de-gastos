@@ -1,16 +1,19 @@
 'use client';
 
+import { useFinanceSummary } from '@/hooks/useFinanceSummary';
 import { useTransactionActions } from '@/hooks/useTransactionActions';
 import { useFinanceStore } from '@/store/useFinanceStore';
 import { formatCurrency, formatDate } from '@/utils/formatters';
-import { useFinanceSummary } from '@/hooks/useFinanceSummary';
+
+const ICON_BUTTON_CLASS =
+  'rounded-lg px-2 py-1 text-mist transition-colors';
 
 export function TransactionList() {
-  // Ahora la lista respeta el filtro de mes.
-const { monthlyTransactions: transactions } = useFinanceSummary();
-const setEditingTransaction = useFinanceStore(
-  (state) => state.setEditingTransaction,
-);
+  // La lista respeta el filtro de mes.
+  const { monthlyTransactions: transactions } = useFinanceSummary();
+  const setEditingTransaction = useFinanceStore(
+    (state) => state.setEditingTransaction,
+  );
   const isLoading = useFinanceStore((state) => state.isLoading);
   const { remove } = useTransactionActions();
 
@@ -21,20 +24,19 @@ const setEditingTransaction = useFinanceStore(
   }
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <section className="glass-card p-4">
       <h2 className="text-lg font-semibold">Transacciones</h2>
 
-      {isLoading && <p className="mt-3 text-slate-500">Cargando...</p>}
+      {isLoading && <p className="mt-3 text-mist">Cargando...</p>}
 
       {!isLoading && transactions.length === 0 && (
-        <p className="mt-3 text-slate-500">
-            No hay transacciones en este mes.
-        </p>
+        <p className="mt-3 text-mist">No hay transacciones en este mes.</p>
       )}
 
-      <ul className="mt-2 divide-y divide-slate-100">
+      <ul className="mt-2 divide-y divide-white/10">
         {transactions.map((transaction) => {
           const isIncome = transaction.category.type === 'income';
+          const label = transaction.description ?? transaction.category.name;
 
           return (
             <li
@@ -42,10 +44,8 @@ const setEditingTransaction = useFinanceStore(
               className="flex items-center justify-between gap-3 py-3"
             >
               <div className="min-w-0">
-                <p className="truncate font-medium">
-                  {transaction.description ?? transaction.category.name}
-                </p>
-                <p className="text-sm text-slate-500">
+                <p className="truncate font-medium">{label}</p>
+                <p className="text-sm text-mist">
                   {transaction.category.name} ·{' '}
                   <time dateTime={transaction.date}>
                     {formatDate(transaction.date)}
@@ -56,29 +56,29 @@ const setEditingTransaction = useFinanceStore(
               <div className="flex shrink-0 items-center gap-2">
                 <span
                   className={`font-semibold ${
-                    isIncome ? 'text-emerald-600' : 'text-rose-600'
+                    isIncome ? 'text-aqua' : 'text-coral'
                   }`}
                 >
                   {isIncome ? '+' : '-'}
                   {formatCurrency(transaction.amount)}
                 </span>
                 <button
-  type="button"
-  onClick={() => {
-    setEditingTransaction(transaction);
-    // En celular el formulario queda arriba: lo traemos a la vista.
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }}
-  aria-label={`Editar ${transaction.description ?? transaction.category.name}`}
-  className="rounded-lg px-2 py-1 text-slate-400 hover:bg-indigo-50 hover:text-indigo-600"
->
-  ✎
-</button>
+                  type="button"
+                  onClick={() => {
+                    setEditingTransaction(transaction);
+                    // En celular el formulario queda arriba: lo traemos a la vista.
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  aria-label={`Editar ${label}`}
+                  className={`${ICON_BUTTON_CLASS} hover:bg-ocean/10 hover:text-ocean`}
+                >
+                  ✎
+                </button>
                 <button
                   type="button"
                   onClick={() => handleDelete(transaction.id)}
-                  aria-label={`Eliminar ${transaction.description ?? transaction.category.name}`}
-                  className="rounded-lg px-2 py-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
+                  aria-label={`Eliminar ${label}`}
+                  className={`${ICON_BUTTON_CLASS} hover:bg-coral/10 hover:text-coral`}
                 >
                   ✕
                 </button>

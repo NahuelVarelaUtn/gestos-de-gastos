@@ -1,0 +1,10 @@
+@use 'mixins' as *;
+
+// En la capa "components", las utilidades de Tailwind (p-4, etc.)
+// pueden sobrescribir estas reglas cuando hace falta.
+@layer components {
+    .glass-card {
+    @include glass;
+    border-radius: 1.25rem;
+    }
+}

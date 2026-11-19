@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type SyntheticEvent } from 'react';
+import { INPUT_CLASS, PRIMARY_BUTTON_CLASS } from '@/components/ui/classNames';
 import {
   confirmEmailCode,
   requestEmailCode,
@@ -11,14 +12,6 @@ import { useFinanceStore } from '@/store/useFinanceStore';
 
 type Mode = 'register' | 'login';
 type RegisterStep = 'email' | 'code';
-
-const INPUT_CLASS =
-  'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base ' +
-  'focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200';
-
-const PRIMARY_BUTTON_CLASS =
-  'w-full rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white ' +
-  'hover:bg-indigo-700 disabled:opacity-50';
 
 const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : 'Error inesperado';
@@ -65,8 +58,7 @@ export function AccountPanel() {
   function handleConfirmCode(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     void run(async () => {
-      // Mismo usuario, mismo id: las transacciones se conservan
-      // y no hace falta recargar nada.
+      // Mismo usuario, mismo id: las transacciones se conservan.
       setUser(await confirmEmailCode(email.trim(), code.trim(), password));
     });
   }
@@ -94,14 +86,14 @@ export function AccountPanel() {
   if (!user.isAnonymous) {
     return (
       <div className="flex items-center justify-between gap-3 text-sm">
-        <p className="truncate text-slate-600">
-          Sesión: <strong className="text-slate-900">{user.email}</strong>
+        <p className="truncate text-mist">
+          Sesión: <strong className="text-glacier">{user.email}</strong>
         </p>
         <button
           type="button"
           onClick={handleSignOut}
           disabled={isSubmitting}
-          className="shrink-0 rounded-lg border border-slate-300 px-3 py-1 font-medium text-slate-700 hover:bg-slate-100"
+          className="shrink-0 rounded-lg border border-white/15 px-3 py-1 font-medium text-glacier transition-colors hover:bg-white/10"
         >
           Cerrar sesión
         </button>
@@ -111,8 +103,8 @@ export function AccountPanel() {
 
   // --- Usuario anónimo ---
   return (
-    <details className="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
-      <summary className="cursor-pointer font-semibold text-indigo-900">
+    <details className="rounded-xl border border-ocean/30 bg-ocean/10 p-4">
+      <summary className="cursor-pointer font-semibold text-glacier">
         Guardá tus datos: creá una cuenta o ingresá
       </summary>
 
@@ -125,10 +117,10 @@ export function AccountPanel() {
               role="tab"
               aria-selected={mode === option}
               onClick={() => changeMode(option)}
-              className={`rounded-lg px-3 py-2 text-sm font-medium ${
+              className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 mode === option
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-slate-700'
+                  ? 'bg-ocean text-white'
+                  : 'bg-white/5 text-glacier hover:bg-white/10'
               }`}
             >
               {option === 'register' ? 'Crear cuenta' : 'Ya tengo cuenta'}
@@ -138,7 +130,7 @@ export function AccountPanel() {
 
         {mode === 'register' && step === 'email' && (
           <form onSubmit={handleRequestCode} className="space-y-3">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-mist">
               Tus transacciones actuales se guardan en la cuenta nueva.
             </p>
             <label htmlFor="register-email" className="block text-sm font-medium">
@@ -153,7 +145,11 @@ export function AccountPanel() {
               onChange={(event) => setEmail(event.target.value)}
               className={INPUT_CLASS}
             />
-            <button type="submit" disabled={isSubmitting} className={PRIMARY_BUTTON_CLASS}>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={PRIMARY_BUTTON_CLASS}
+            >
               {isSubmitting ? 'Enviando...' : 'Enviar código'}
             </button>
           </form>
@@ -161,25 +157,26 @@ export function AccountPanel() {
 
         {mode === 'register' && step === 'code' && (
           <form onSubmit={handleConfirmCode} className="space-y-3">
-            <p className="text-sm text-slate-600">
-              Te enviamos un código a <strong>{email}</strong>.
+            <p className="text-sm text-mist">
+              Te enviamos un código a{' '}
+              <strong className="text-glacier">{email}</strong>.
             </p>
-<label htmlFor="code" className="block text-sm font-medium">
-  Código de verificación
-</label>
-<input
-  id="code"
-  type="text"
-  required
-  inputMode="numeric"
-  autoComplete="one-time-code"
-  // Supabase permite configurar códigos de 6 a 10 dígitos.
-  pattern="\d{6,10}"
-  maxLength={10}
-  value={code}
-  onChange={(event) => setCode(event.target.value)}
-  className={INPUT_CLASS}
-/>
+            <label htmlFor="code" className="block text-sm font-medium">
+              Código de verificación
+            </label>
+            <input
+              id="code"
+              type="text"
+              required
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              // Supabase permite configurar códigos de 6 a 10 dígitos.
+              pattern="\d{6,10}"
+              maxLength={10}
+              value={code}
+              onChange={(event) => setCode(event.target.value)}
+              className={INPUT_CLASS}
+            />
             <label htmlFor="new-password" className="block text-sm font-medium">
               Contraseña (mínimo 6 caracteres)
             </label>
@@ -193,13 +190,17 @@ export function AccountPanel() {
               onChange={(event) => setPassword(event.target.value)}
               className={INPUT_CLASS}
             />
-            <button type="submit" disabled={isSubmitting} className={PRIMARY_BUTTON_CLASS}>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={PRIMARY_BUTTON_CLASS}
+            >
               {isSubmitting ? 'Verificando...' : 'Crear cuenta'}
             </button>
             <button
               type="button"
               onClick={() => setStep('email')}
-              className="w-full text-sm text-indigo-700 hover:underline"
+              className="w-full text-sm text-ocean hover:underline"
             >
               Usar otro email
             </button>
@@ -208,7 +209,7 @@ export function AccountPanel() {
 
         {mode === 'login' && (
           <form onSubmit={handleSignIn} className="space-y-3">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-mist">
               Las transacciones cargadas en esta sesión sin cuenta no se
               transfieren.
             </p>
@@ -236,14 +237,18 @@ export function AccountPanel() {
               onChange={(event) => setPassword(event.target.value)}
               className={INPUT_CLASS}
             />
-            <button type="submit" disabled={isSubmitting} className={PRIMARY_BUTTON_CLASS}>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={PRIMARY_BUTTON_CLASS}
+            >
               {isSubmitting ? 'Ingresando...' : 'Ingresar'}
             </button>
           </form>
         )}
 
         {message && (
-          <p role="alert" className="rounded-lg bg-rose-50 p-3 text-sm text-rose-700">
+          <p role="alert" className="rounded-lg bg-coral/10 p-3 text-sm text-coral">
             {message}
           </p>
         )}

@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, type SyntheticEvent } from 'react';
+import {
+  INPUT_CLASS,
+  PRIMARY_BUTTON_CLASS,
+  SECONDARY_BUTTON_CLASS,
+} from '@/components/ui/classNames';
 import { useTransactionActions } from '@/hooks/useTransactionActions';
 import { useFinanceStore } from '@/store/useFinanceStore';
 import type { TransactionType } from '@/types';
 import { todayISO } from '@/utils/formatters';
-
-// text-base (16px) evita que iOS haga zoom al enfocar el campo.
-const INPUT_CLASS =
-  'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base ' +
-  'focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200';
 
 const TYPE_OPTIONS: { value: TransactionType; label: string }[] = [
   { value: 'expense', label: 'Gasto' },
@@ -86,23 +86,20 @@ export function TransactionForm() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
-    >
-    <h2 className="text-lg font-semibold">
+    <form onSubmit={handleSubmit} className="glass-card space-y-4 p-4">
+      <h2 className="text-lg font-semibold">
         {isEditing ? 'Editar transacción' : 'Nueva transacción'}
-    </h2>
+      </h2>
 
       <fieldset className="grid grid-cols-2 gap-2">
         <legend className="sr-only">Tipo de transacción</legend>
         {TYPE_OPTIONS.map((option) => (
           <label
             key={option.value}
-            className={`cursor-pointer rounded-lg border px-3 py-2 text-center font-medium ${
+            className={`cursor-pointer rounded-lg border px-3 py-2 text-center font-medium transition-colors ${
               type === option.value
-                ? 'border-indigo-600 bg-indigo-600 text-white'
-                : 'border-slate-300 bg-white text-slate-700'
+                ? 'border-ocean bg-ocean text-white'
+                : 'border-white/15 bg-white/5 text-glacier hover:bg-white/10'
             }`}
           >
             <input
@@ -191,24 +188,24 @@ export function TransactionForm() {
         </div>
       </div>
 
-    <div className="flex gap-2">
-  {isEditing && (
-    <button
-      type="button"
-      onClick={() => setEditingTransaction(null)}
-      className="w-full rounded-lg border border-slate-300 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50"
-    >
-      Cancelar
-    </button>
-  )}
-  <button
-    type="submit"
-    disabled={isSubmitting}
-    className="w-full rounded-lg bg-indigo-600 px-4 py-3 font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
-  >
-    {isSubmitting ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Agregar'}
-  </button>
-</div>
+      <div className="flex gap-2">
+        {isEditing && (
+          <button
+            type="button"
+            onClick={() => setEditingTransaction(null)}
+            className={SECONDARY_BUTTON_CLASS}
+          >
+            Cancelar
+          </button>
+        )}
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className={PRIMARY_BUTTON_CLASS}
+        >
+          {isSubmitting ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Agregar'}
+        </button>
+      </div>
     </form>
   );
 }
