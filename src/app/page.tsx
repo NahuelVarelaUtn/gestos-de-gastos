@@ -2,7 +2,9 @@
 
 import { useCallback, useState } from 'react';
 import { AccountPanel } from '@/components/account/AccountPanel';
-import { CategoryBreakdown } from '@/components/summary/CategoryBreakdown';
+import { BudgetForm } from '@/components/budget/BudgetForm';
+import { BudgetProgress } from '@/components/budget/BudgetProgress';
+import { ExpenseDonut } from '@/components/charts/ExpenseDonut';
 import { MonthFilter } from '@/components/summary/MonthFilter';
 import { SummaryCards } from '@/components/summary/SummaryCards';
 import { TransactionForm } from '@/components/transactions/TransactionForm';
@@ -24,6 +26,7 @@ export default function HomePage() {
 
   // Estado de la UI: solo le importa a esta página, no va al store global.
   const [isCreating, setIsCreating] = useState(false);
+  const [isBudgetOpen, setIsBudgetOpen] = useState(false);
   const isFormOpen = isCreating || editingTransaction !== null;
 
   // useCallback mantiene la misma función entre renders,
@@ -33,8 +36,10 @@ export default function HomePage() {
     setEditingTransaction(null);
   }, [setEditingTransaction]);
 
+  const closeBudget = useCallback(() => setIsBudgetOpen(false), []);
+
   return (
-    <main className="mx-auto min-h-screen max-w-3xl space-y-6 p-4 pb-28 md:p-8 md:pb-32">
+    <main className="mx-auto min-h-screen max-w-5xl space-y-6 p-4 pb-28 md:p-8 md:pb-32">
       <header className="space-y-3">
         <h1 className="text-2xl font-bold md:text-3xl">Gestos de Gastos</h1>
         <AccountPanel />
@@ -48,7 +53,13 @@ export default function HomePage() {
 
       <MonthFilter />
       <SummaryCards />
-      <CategoryBreakdown />
+
+      {/* Bento: una columna en celular, dos en desktop */}
+      <div className="grid items-start gap-6 md:grid-cols-2">
+        <ExpenseDonut />
+        <BudgetProgress onEdit={() => setIsBudgetOpen(true)} />
+      </div>
+
       <TransactionList />
 
       <FloatingButton onClick={() => setIsCreating(true)} />
@@ -62,6 +73,14 @@ export default function HomePage() {
           key={editingTransaction?.id ?? 'new'}
           onDone={closeForm}
         />
+      </Modal>
+
+      <Modal
+        isOpen={isBudgetOpen}
+        onClose={closeBudget}
+        title="Presupuestos mensuales"
+      >
+        <BudgetForm onDone={closeBudget} />
       </Modal>
     </main>
   );

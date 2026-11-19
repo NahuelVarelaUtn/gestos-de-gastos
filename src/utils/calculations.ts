@@ -71,3 +71,39 @@ export function calculateExpensesByCategory(
     total: fromCents(cents),
   })).sort((a, b) => b.total - a.total);
 }
+
+export interface BudgetStatus {
+  category: Category;
+  spent: number;
+  budget: number;
+  /** Porcentaje usado del presupuesto (puede superar 100). */
+  percentage: number;
+}
+
+/** Cuánto se gastó de cada presupuesto, de mayor a menor uso. */
+export function calculateBudgetStatus(
+  categories: Category[],
+  expensesByCategory: CategoryTotal[],
+): BudgetStatus[] {
+  const spentById = new Map(
+    expensesByCategory.map(({ category, total }) => [category.id, total]),
+  );
+
+  return categories
+    .filter(
+      (category): category is Category & { monthly_budget: number } =>
+        category.type === 'expense' && category.monthly_budget !== null,
+    )
+    .map((category) => {
+      const spent = spentById.get(category.id) ?? 0;
+      const budget = category.monthly_budget;
+
+      return {
+        category,
+        spent,
+        budget,
+        percentage: Math.round((spent / budget) * 100),
+      };
+    })
+    .sort((a, b) => b.percentage - a.percentage);
+}

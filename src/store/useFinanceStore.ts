@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import type { AuthUser, Category, MonthFilter, Transaction } from '@/types';
 
-
 interface FinanceState {
   transactions: Transaction[];
   categories: Category[];
@@ -15,6 +14,7 @@ interface FinanceState {
 interface FinanceActions {
   setTransactions: (transactions: Transaction[]) => void;
   setCategories: (categories: Category[]) => void;
+  updateCategory: (category: Category) => void;
   addTransaction: (transaction: Transaction) => void;
   updateTransaction: (transaction: Transaction) => void;
   removeTransaction: (id: string) => void;
@@ -25,31 +25,29 @@ interface FinanceActions {
   setUser: (user: AuthUser | null) => void;
 }
 
-/** Mes y año actuales. En el servidor devuelve un valor fijo que nunca se muestra. */
-function getInitialFilter(): MonthFilter {
-  // window solo existe en el navegador: así evitamos leer la fecha en el build.
-  if (typeof window === 'undefined') {
-    return { month: 1, year: 2000 };
-  }
-  const today = new Date();
-  return { month: today.getMonth() + 1, year: today.getFullYear() };
-}
+const today = new Date();
 
 export const useFinanceStore = create<FinanceState & FinanceActions>()(
   (set) => ({
     // --- Estado inicial ---
     transactions: [],
     categories: [],
-    filter: getInitialFilter(),
+    filter: { month: today.getMonth() + 1, year: today.getFullYear() },
     isLoading: false,
     error: null,
     editingTransaction: null,
     user: null,
-    setUser: (user) => set({ user }),
 
     // --- Acciones ---
     setTransactions: (transactions) => set({ transactions }),
     setCategories: (categories) => set({ categories }),
+
+    updateCategory: (updated) =>
+      set((state) => ({
+        categories: state.categories.map((category) =>
+          category.id === updated.id ? updated : category,
+        ),
+      })),
 
     addTransaction: (transaction) =>
       set((state) => ({ transactions: [transaction, ...state.transactions] })),
@@ -75,5 +73,6 @@ export const useFinanceStore = create<FinanceState & FinanceActions>()(
     setLoading: (isLoading) => set({ isLoading }),
     setError: (error) => set({ error }),
     setEditingTransaction: (editingTransaction) => set({ editingTransaction }),
+    setUser: (user) => set({ user }),
   }),
 );
