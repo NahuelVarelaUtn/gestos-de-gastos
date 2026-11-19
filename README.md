@@ -39,7 +39,7 @@ El esquema de base de datos y las políticas RLS están en `supabase/schema.sql`
 ## Correr el proyecto localmente
 
 1. Cloná el repo e instalá dependencias: `npm install`
-2. Creá un proyecto en Supabase y ejecutá `supabase/schema.sql` en el SQL Editor
+2. Creá un proyecto en Supabase y ejecutá los archivos de supabase/migrations en orden.
 3. Activá los inicios de sesión anónimos en Authentication
 4. Copiá `.env.example` a `.env.local` y completá tus claves
 5. `npm run dev`

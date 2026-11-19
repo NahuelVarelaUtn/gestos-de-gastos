@@ -1,5 +1,5 @@
 import { parseISO } from 'date-fns';
-import type { MonthFilter, Transaction } from '@/types';
+import type {Category, MonthFilter, Transaction } from '@/types';
 
 export interface BalanceSummary {
   income: number;
@@ -8,8 +8,7 @@ export interface BalanceSummary {
 }
 
 export interface CategoryTotal {
-  categoryId: string;
-  name: string;
+  category: Category;
   total: number;
 }
 
@@ -55,21 +54,20 @@ export function filterByMonth(
 export function calculateExpensesByCategory(
   transactions: Transaction[],
 ): CategoryTotal[] {
-  const totals = new Map<string, { name: string; cents: number }>();
+  const totals = new Map<string, { category: Category; cents: number }>();
 
   for (const { category, amount } of transactions) {
     if (category.type !== 'expense') continue;
 
     const current = totals.get(category.id);
     totals.set(category.id, {
-      name: category.name,
+      category,
       cents: (current?.cents ?? 0) + toCents(amount),
     });
   }
 
-  return Array.from(totals, ([categoryId, { name, cents }]) => ({
-    categoryId,
-    name,
+  return Array.from(totals.values(), ({ category, cents }) => ({
+    category,
     total: fromCents(cents),
   })).sort((a, b) => b.total - a.total);
 }

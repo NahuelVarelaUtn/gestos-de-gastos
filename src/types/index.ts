@@ -5,6 +5,12 @@ export interface Category {
   id: string;
   name: string;
   type: TransactionType;
+  /** Nombre del ícono de Lucide, ej. 'heart-pulse'. */
+  icon: string;
+  /** Color en hexadecimal, ej. '#5eead4'. */
+  color: string;
+  /** Presupuesto mensual; null si no tiene. */
+  monthly_budget: number | null;
 }
 
 /** Transacción tal como la usa la UI: con su categoría incluida. */

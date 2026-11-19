@@ -4,7 +4,7 @@ import type { Category } from '@/types';
 export async function getCategories(): Promise<Category[]> {
   const { data, error } = await supabase
     .from('categories')
-    .select('id, name, type')
+    .select('id, name, type, icon, color, monthly_budget')
     .order('name')
     .overrideTypes<Category[], { merge: false }>();
 

@@ -4,7 +4,8 @@ import type { Transaction, TransactionInput } from '@/types';
 // "category:categories(...)" trae la categoría relacionada (un JOIN)
 // y la renombra a "category" para que coincida con nuestro tipo.
 const TRANSACTION_COLUMNS =
-  'id, amount, description, date, category:categories(id, name, type)';
+  'id, amount, description, date, ' +
+  'category:categories(id, name, type, icon, color, monthly_budget)';
 
 export async function getTransactions(): Promise<Transaction[]> {
   const { data, error } = await supabase

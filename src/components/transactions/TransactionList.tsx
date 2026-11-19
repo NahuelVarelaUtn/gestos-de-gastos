@@ -4,6 +4,7 @@ import { useFinanceSummary } from '@/hooks/useFinanceSummary';
 import { useTransactionActions } from '@/hooks/useTransactionActions';
 import { useFinanceStore } from '@/store/useFinanceStore';
 import { formatCurrency, formatDate } from '@/utils/formatters';
+import { CategoryIcon } from '@/components/ui/CategoryIcon';
 
 const ICON_BUTTON_CLASS =
   'rounded-lg px-2 py-1 text-mist transition-colors';
@@ -43,15 +44,20 @@ export function TransactionList() {
               key={transaction.id}
               className="flex items-center justify-between gap-3 py-3"
             >
-              <div className="min-w-0">
-                <p className="truncate font-medium">{label}</p>
-                <p className="text-sm text-mist">
-                  {transaction.category.name} ·{' '}
-                  <time dateTime={transaction.date}>
-                    {formatDate(transaction.date)}
-                  </time>
-                </p>
-              </div>
+              <div className="flex min-w-0 items-center gap-3">
+  <CategoryIcon category={transaction.category} />
+  <div className="min-w-0">
+    <p className="truncate font-medium">
+      {transaction.description ?? transaction.category.name}
+    </p>
+    <p className="text-sm text-mist">
+      {transaction.category.name} ·{' '}
+      <time dateTime={transaction.date}>
+        {formatDate(transaction.date)}
+      </time>
+    </p>
+  </div>
+</div>
 
               <div className="flex shrink-0 items-center gap-2">
                 <span
